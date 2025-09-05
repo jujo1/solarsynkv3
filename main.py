@@ -57,19 +57,20 @@ def main() -> None:
     current_date = datetime.now()
 
     # Start the Loop
-    print("------------------------------------------------------------------------------")
-    print_colored(f"Running Script SolarSynkV3", ConsoleColor.MAGENTA)
+    print("-" * 78)
+    print_colored("Running Script SolarSynkV3", ConsoleColor.MAGENTA)
     print(f"Using API Endpoint: {ConsoleColor.MAGENTA}"
           f"{json_settings['API_Server']}{ConsoleColor.ENDC}")
     print("https://github.com/martinville/solarsynkv3")
-    print("------------------------------------------------------------------------------")
+    print("-" * 78)
 
     # Get Bearer Token
     bearer_token = ""
     try:
         bearer_token = gettoken.gettoken()
         if not bearer_token:
-            print("Failed to retrieve Bearer Token. Check credentials or server status.")
+            print("Failed to retrieve Bearer Token. "
+                  "Check credentials or server status.")
     except Exception as e:
         logging.error(f"Token retrieval error: {e}")
         print_colored("Error retrieving Bearer Token.", ConsoleColor.FAIL)
@@ -84,7 +85,8 @@ def main() -> None:
     print_colored("Script execution completed.", ConsoleColor.OKBLUE)
 
 
-def process_inverter(bearer_token: str, serial_item: str, current_date: datetime) -> None:
+def process_inverter(bearer_token: str, serial_item: str,
+                     current_date: datetime) -> None:
     """
     Process a single inverter.
 

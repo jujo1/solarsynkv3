@@ -10,6 +10,10 @@ from cryptography.hazmat.primitives.asymmetric.padding import PKCS1v15
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 from utils import ConsoleColor, load_settings, print_colored
+from constants import (
+    SUNSYNK_API_BASE_URL, PUBLIC_KEY_ENDPOINT, TOKEN_ENDPOINT,
+    CLIENT_ID, GRANT_TYPE, AREA_CODE, SOURCE, DEFAULT_TIMEOUT
+)
 
 
 def gettoken() -> Optional[str]:
@@ -61,12 +65,12 @@ def _get_public_key():
         requests.RequestException: If API request fails
     """
     response = requests.get(
-        'https://api.sunsynk.net/anonymous/publicKey',
+        f'{SUNSYNK_API_BASE_URL}{PUBLIC_KEY_ENDPOINT}',
         params={
-            'source': 'sunsynk',
+            'source': SOURCE,
             'nonce': int(time.time() * 1000)
         },
-        timeout=10
+        timeout=DEFAULT_TIMEOUT
     )
     response.raise_for_status()
 
@@ -120,23 +124,24 @@ def _authenticate(json_settings: dict, encrypted_password: str) -> str:
         json.JSONDecodeError: If response parsing fails
     """
     # API URL
-    url = f'https://{json_settings["API_Server"]}/oauth/token/new'
+    url = f'https://{json_settings["API_Server"]}{TOKEN_ENDPOINT}'
 
     # Prepare request payload
     payload = {
-        "areaCode": "sunsynk",
-        "client_id": "csp-web",
-        "grant_type": "password",
+        "areaCode": AREA_CODE,
+        "client_id": CLIENT_ID,
+        "grant_type": GRANT_TYPE,
         "password": encrypted_password,
-        "source": "sunsynk",
+        "source": SOURCE,
         "username": json_settings['sunsynk_user']
     }
 
     # Headers
     headers = {"Content-Type": "application/json"}
 
-    # Send POST request with timeout (10s)
-    response = requests.post(url, json=payload, headers=headers, timeout=10)
+    # Send POST request with timeout
+    response = requests.post(url, json=payload, headers=headers,
+                             timeout=DEFAULT_TIMEOUT)
     response.raise_for_status()
 
     # Parse response
