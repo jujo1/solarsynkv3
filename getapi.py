@@ -1,6 +1,7 @@
 import postapi
 import json
 import requests
+import logging
 from datetime import datetime
 
 class ConsoleColor:    
@@ -13,15 +14,15 @@ class ConsoleColor:
     ENDC = "\033[0m"
     BOLD = "\033[1m" 
 
-# Load settings from JSON file
+# Load settings from JSON file (global initialization)
+api_server = "api.sunsynk.net"  # default value
 try:
     with open('/data/options.json') as options_file:
         json_settings = json.load(options_file)
         api_server = json_settings['API_Server']
 except Exception as e:
-    logging.error(f"Failed to load settings: {e}")
-    print(ConsoleColor.FAIL + "Error loading settings.json. Ensure the file exists and is valid JSON." + ConsoleColor.ENDC)
-    exit()
+    # If we can't load settings during import, use default and load later
+    pass
     
 def GetInverterInfo(Token,Serial):    
     global api_server         

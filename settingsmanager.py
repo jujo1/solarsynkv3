@@ -15,19 +15,20 @@ import postapi
 #Get server provider settings and save to file settings_serial.json
 import json
 import requests
+import logging
 from datetime import datetime
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) 
 
-# Load settings from JSON file
+# Load settings from JSON file (global initialization)
+api_server = "api.sunsynk.net"  # default value
 try:
     with open('/data/options.json') as options_file:
         json_settings = json.load(options_file)
         api_server = json_settings['API_Server']
 except Exception as e:
-    logging.error(f"Failed to load settings: {e}")
-    print(ConsoleColor.FAIL + "Error loading settings.json. Ensure the file exists and is valid JSON." + ConsoleColor.ENDC)
-    exit()
+    # If we can't load settings during import, use default and load later
+    pass
     
 class ConsoleColor:    
     OKBLUE = "\033[34m"

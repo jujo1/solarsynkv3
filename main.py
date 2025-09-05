@@ -2,6 +2,7 @@ import gettoken
 import getapi
 import postapi
 import settingsmanager
+import entity_manager
 import os
 import json
 import requests
@@ -40,6 +41,12 @@ except Exception as e:
 
 # Retrieve inverter serials
 inverterserials = str(json_settings['sunsynk_serial']).split(";")
+
+# Validate and create required Home Assistant entities before starting
+print(ConsoleColor.OKBLUE + "Checking required Home Assistant entities..." + ConsoleColor.ENDC)
+if not entity_manager.validate_and_create_required_entities(inverterserials):
+    print(ConsoleColor.FAIL + "Some required entities could not be created automatically." + ConsoleColor.ENDC)
+    print(ConsoleColor.MAGENTA + "The script will continue, but you may need to create missing entities manually." + ConsoleColor.ENDC)
 
 # Function to safely fetch data using threading
 
