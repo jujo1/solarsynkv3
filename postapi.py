@@ -1,40 +1,61 @@
-def PostHAEntity(Serial,UOM,UOMLong,fName,sName,EntityVal):
-    import json
-    import requests
-    import urllib3
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)    
-    
-    class ConsoleColor:    
-        OKBLUE = "\033[34m"
-        OKCYAN = "\033[36m"
-        OKGREEN = "\033[32m"        
-        MAGENTA = "\033[35m"
-        WARNING = "\033[33m"
-        FAIL = "\033[31m"
-        ENDC = "\033[0m"
-        BOLD = "\033[1m" 
-    
-    with open('/data/options.json') as options_file:
-        json_settings = json.load(options_file)
-        HAToken = json_settings['HA_LongLiveToken']
+"""Module for posting data to Home Assistant API."""
 
-        if json_settings['Enable_HTTPS']:
-            httpurl_proto = "https"
-        else:
-            httpurl_proto = "http"        
+import json
+import requests
+import urllib3
+from typing import Optional
 
-            
-        #print(json_settings['Enable_HTTPS'])
-        # API URL
-        url = f"{httpurl_proto}://" + str(json_settings['Home_Assistant_IP']) + ":" + str(json_settings['Home_Assistant_PORT']) + "/api/states/sensor.solarsynkv3_" + Serial + '_' + sName
-        
-        #print ("HAToken:" + HAToken)
-        #payload = {"attributes": {"unit_of_measurement": f"{UOM}", "friendly_name": f"{fName}"}, "state": f"{EntityVal}"}        
-        if UOM == "kWh":
-            payload = {"attributes": {"device_class": f"{UOMLong}", "state_class":"total_increasing", "last_reset":"None", "unit_of_measurement": f"{UOM}", "friendly_name": f"{fName}"}, "state": f"{EntityVal}"}
-        else:
-            payload = {"attributes": {"device_class": f"{UOMLong}", "state_class":"measurement", "unit_of_measurement": f"{UOM}", "friendly_name": f"{fName}"}, "state": f"{EntityVal}"}
-        #print(payload)
+from utils import ConsoleColor, load_settings
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+def PostHAEntity(Serial, UOM, UOMLong, fName, sName, EntityVal):
+    """
+    Post entity data to Home Assistant.
+    
+    Args:
+        Serial: Device serial number
+        UOM: Unit of measurement
+        UOMLong: Long unit description
+        fName: Friendly name
+        sName: Short name
+        EntityVal: Entity value
+    """
+    json_settings = load_settings()
+    ha_token = json_settings['HA_LongLiveToken']
+
+    if json_settings['Enable_HTTPS']:
+        httpurl_proto = "https"
+    else:
+        httpurl_proto = "http"
+
+    # API URL
+    url = (f"{httpurl_proto}://{json_settings['Home_Assistant_IP']}:"
+           f"{json_settings['Home_Assistant_PORT']}/api/states/"
+           f"sensor.solarsynkv3_{Serial}_{sName}")
+
+    if UOM == "kWh":
+        payload = {
+            "attributes": {
+                "device_class": f"{UOMLong}",
+                "state_class": "total_increasing",
+                "last_reset": "None",
+                "unit_of_measurement": f"{UOM}",
+                "friendly_name": f"{fName}"
+            },
+            "state": f"{EntityVal}"
+        }
+    else:
+        payload = {
+            "attributes": {
+                "device_class": f"{UOMLong}",
+                "state_class": "measurement",
+                "unit_of_measurement": f"{UOM}",
+                "friendly_name": f"{fName}"
+            },
+            "state": f"{EntityVal}"
+        }
         
     
     # Headers
