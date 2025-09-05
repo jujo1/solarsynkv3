@@ -1,3 +1,15 @@
+def get_sensor_name_prefix():
+    """Get the sensor name prefix from config, defaulting to 'solarsynkv3' if not specified."""
+    import json
+    try:
+        with open('/data/options.json') as options_file:
+            json_settings = json.load(options_file)
+            prefix = json_settings.get('sensor_name_prefix', '').strip()
+            return prefix if prefix else 'solarsynkv3'
+    except:
+        # Fallback to default if config can't be read
+        return 'solarsynkv3'
+
 def PostHAEntity(Serial,UOM,UOMLong,fName,sName,EntityVal):
     import json
     import requests
@@ -26,7 +38,8 @@ def PostHAEntity(Serial,UOM,UOMLong,fName,sName,EntityVal):
             
         #print(json_settings['Enable_HTTPS'])
         # API URL
-        url = f"{httpurl_proto}://" + str(json_settings['Home_Assistant_IP']) + ":" + str(json_settings['Home_Assistant_PORT']) + "/api/states/sensor.solarsynkv3_" + Serial + '_' + sName
+        sensor_prefix = get_sensor_name_prefix()
+        url = f"{httpurl_proto}://" + str(json_settings['Home_Assistant_IP']) + ":" + str(json_settings['Home_Assistant_PORT']) + "/api/states/sensor." + sensor_prefix + "_" + Serial + '_' + sName
         
         #print ("HAToken:" + HAToken)
         #payload = {"attributes": {"unit_of_measurement": f"{UOM}", "friendly_name": f"{fName}"}, "state": f"{EntityVal}"}        
@@ -99,7 +112,8 @@ def ConnectionTest(Serial,UOM,UOMLong,fName,sName,EntityVal):
             
         #print(json_settings['Enable_HTTPS'])
         # API URL
-        url = f"{httpurl_proto}://" + str(json_settings['Home_Assistant_IP']) + ":" + str(json_settings['Home_Assistant_PORT']) + "/api/states/sensor.solarsynkv3_" + Serial + '_' + sName
+        sensor_prefix = get_sensor_name_prefix()
+        url = f"{httpurl_proto}://" + str(json_settings['Home_Assistant_IP']) + ":" + str(json_settings['Home_Assistant_PORT']) + "/api/states/sensor." + sensor_prefix + "_" + Serial + '_' + sName
         
         #print ("HAToken:" + HAToken)
         #payload = {"attributes": {"unit_of_measurement": f"{UOM}", "friendly_name": f"{fName}"}, "state": f"{EntityVal}"}        
