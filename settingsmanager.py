@@ -1,5 +1,17 @@
 import postapi
 
+def get_sensor_name_prefix():
+    """Get the sensor name prefix from config, defaulting to 'solarsynkv3' if not specified."""
+    import json
+    try:
+        with open('/data/options.json') as options_file:
+            json_settings = json.load(options_file)
+            prefix = json_settings.get('sensor_name_prefix', '').strip()
+            return prefix if prefix else 'solarsynkv3'
+    except:
+        # Fallback to default if config can't be read
+        return 'solarsynkv3'
+
 #################################################################################################################################################
 ## NOTES on the workflow
 ## Steps
@@ -92,7 +104,8 @@ def GetNewSettingsFromHAEntity(SunSynkToken,Serial):
             httpurl_proto = "http"
 
         headers = {"Content-Type": "application/json","Authorization": f"Bearer {HaToken}"}  
-        url = f"{httpurl_proto}://" + str(json_settings['Home_Assistant_IP']) + ":" + str(json_settings['Home_Assistant_PORT']) + "/api/states/input_text.solarsynkv3_" + Serial + '_settings'
+        sensor_prefix = get_sensor_name_prefix()
+        url = f"{httpurl_proto}://" + str(json_settings['Home_Assistant_IP']) + ":" + str(json_settings['Home_Assistant_PORT']) + "/api/states/input_text." + sensor_prefix + "_" + Serial + '_settings'
         print("Get automation settings: " + ConsoleColor.WARNING + url + ConsoleColor.ENDC)
         #print(str(url))
         #print(str(headers))
@@ -111,7 +124,7 @@ def GetNewSettingsFromHAEntity(SunSynkToken,Serial):
         #print(str(parsed_inverter_json['state']))
         
         EntSettings = str(parsed_inverter_json['state']).split(";")        
-        #print("The following settings were found in: " + ConsoleColor.OKCYAN  +  "solarsynkv3_" + Serial + "_settings" + ConsoleColor.ENDC)                
+        #print("The following settings were found in: " + ConsoleColor.OKCYAN  +  get_sensor_name_prefix() + "_" + Serial + "_settings" + ConsoleColor.ENDC)                
         LoopCount=0 
         LastSettingsType=""
         for EntSetting in EntSettings: 
@@ -140,10 +153,10 @@ def GetNewSettingsFromHAEntity(SunSynkToken,Serial):
 
     except requests.exceptions.RequestException as e:
         print(ConsoleColor.FAIL + f"Error: Failed to connect to Home Assistant API. {e}" + ConsoleColor.ENDC)
-        print(f"You probably did not create the settings entity. Manually create it for inverter with serial " + ConsoleColor.OKCYAN + Serial + ConsoleColor.ENDC + " In the HA GUI in menu [Settings] -> [Devices & Services] -> [Helpers] tab -> [+ CREATE HELPER]. Choose [Text] and name it: " + ConsoleColor.OKCYAN  +  "solarsynkv3_" + Serial + "_settings" + ConsoleColor.ENDC)
+        print(f"You probably did not create the settings entity. Manually create it for inverter with serial " + ConsoleColor.OKCYAN + Serial + ConsoleColor.ENDC + " In the HA GUI in menu [Settings] -> [Devices & Services] -> [Helpers] tab -> [+ CREATE HELPER]. Choose [Text] and name it: " + ConsoleColor.OKCYAN  +  get_sensor_name_prefix() + "_" + Serial + "_settings" + ConsoleColor.ENDC)
 
     except json.JSONDecodeError:
-        print(ConsoleColor.MAGENTA + "Notice: Invalid or no settings found to post back to sunsynk. This is not a critical error, it just means that the settings you provided in the settings entity (/api/states/input_text.solarsynkv3_" + Serial + "_settings) is invalid or blank. If this is intentional just ignore." + ConsoleColor.ENDC)                
+        print(ConsoleColor.MAGENTA + "Notice: Invalid or no settings found to post back to sunsynk. This is not a critical error, it just means that the settings you provided in the settings entity (/api/states/input_text." + get_sensor_name_prefix() + "_" + Serial + "_settings) is invalid or blank. If this is intentional just ignore." + ConsoleColor.ENDC)                
         
 def DetermineSettingCategory(JSON_Search_Key,JSON_Search_Key_val):    
     global api_server
@@ -270,7 +283,8 @@ def ResetSettingsEntity(Serial):
         else:
             httpurl_proto = "http"     
     
-    url = f"{httpurl_proto}://" + str(json_settings['Home_Assistant_IP']) + ":" + str(json_settings['Home_Assistant_PORT']) + "/api/states/input_text.solarsynkv3_" + Serial + '_settings'
+    sensor_prefix = get_sensor_name_prefix()
+    url = f"{httpurl_proto}://" + str(json_settings['Home_Assistant_IP']) + ":" + str(json_settings['Home_Assistant_PORT']) + "/api/states/input_text." + sensor_prefix + "_" + Serial + '_settings'
     headers = {"Content-Type": "application/json","Authorization": f"Bearer {HAToken}"}    
     payload = {"attributes": {"unit_of_measurement": ""}, "state": ""}
     

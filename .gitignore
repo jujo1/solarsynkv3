@@ -1,0 +1,19 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary files
+*.tmp
+*.temp
+
+# Settings files that may contain secrets
+settings.json
+svr_settings.json
+battery_settings.json
+systemmode_settings.json
+merged_battery_settings.json
+merged_systemmode_settings.json
+
+# Logs
+*.log
